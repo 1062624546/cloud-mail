@@ -1,29 +1,26 @@
-# .github/workflows/sync.yml
 name: Sync Fork with Upstream
 
 on:
-  # 定时触发：每天 UTC 时间 0 点运行（即北京时间早上 8 点）
   schedule:
     - cron: '0 0 * * *'
-  # 手动触发：允许你在 Actions 页面手动点击运行
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write          # 关键：赋予写入权限
+      contents: write
+      workflows: write   # 新增这一行，允许更新 workflow 文件
     steps:
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
           ref: main
 
-      # 然后才是同步操作
       - name: Sync Fork
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
         with:
           upstream_sync_repo: maillab/cloud-mail
           upstream_sync_branch: main
           target_sync_branch: main
-          github_token: ${{ secrets.GITHUB_TOKEN }} 
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
