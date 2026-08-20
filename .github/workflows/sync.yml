@@ -11,6 +11,8 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write          # 关键：赋予写入权限
     steps:
       - name: Checkout target repo
         uses: actions/checkout@v4
@@ -24,4 +26,4 @@ jobs:
           upstream_sync_repo: maillab/cloud-mail
           upstream_sync_branch: main
           target_sync_branch: main
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }} 
