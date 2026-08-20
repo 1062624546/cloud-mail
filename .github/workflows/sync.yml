@@ -9,18 +9,32 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      workflows: write         
+      contents: write          # 只需要写仓库内容，不需要 workflows
     steps:
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0       # 获取完整历史，便于合并
 
-      - name: Sync Fork
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
-        with:
-          upstream_sync_repo: maillab/cloud-mail
-          upstream_sync_branch: main
-          target_sync_branch: main
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sync with upstream
+        run: |
+          # 添加上游仓库
+          git remote add upstream https://github.com/maillab/cloud-mail.git
+          git fetch upstream main
+
+          # 尝试合并（允许冲突，先不提交）
+          git merge upstream/main --no-commit --no-ff || true
+
+          # 放弃对 .github/workflows/ 下所有文件的更改（保留当前分支的版本）
+          git checkout HEAD -- .github/workflows/ 2>/dev/null || true
+
+          # 如果有其他文件冲突需要手动解决，这里可以忽略，因为我们的目的是保留本地版本
+          # 但如果其他文件有冲突，我们选择保留当前分支（ours）版本
+          git diff --name-only --diff-filter=U | xargs git checkout --ours 2>/dev/null || true
+
+          # 提交合并（如果有变更）
+          git commit -m "Sync with upstream (skip workflow files)" || echo "No changes to commit"
+
+          # 推送到 origin
+          git push origin main
