@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      workflows: write   # 新增这一行，允许更新 workflow 文件
+      workflows: write         
     steps:
       - name: Checkout target repo
         uses: actions/checkout@v4
